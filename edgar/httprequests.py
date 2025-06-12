@@ -116,6 +116,32 @@ class Throttler:
 _throttler_instances = {}  # Singleton instance for throttler
 
 
+
+def update_throttle(request_rate=None, requests_per_second=None):
+    """
+    Update the throttler instance with a new request rate.
+    This function allows you to change the request rate dynamically.
+    Args:
+        request_rate (RequestRate, optional): The new request rate to set.
+        requests_per_second (int, optional): The maximum number of requests per second.
+            If provided, overrides the request_rate parameter.
+    Raises:
+        ValueError: If neither request_rate nor requests_per_second is provided.
+    """
+
+    if requests_per_second is not None:
+        request_rate = RequestRate(max_requests=requests_per_second, time_window=1)
+    elif request_rate is None:
+        raise ValueError("Either request_rate or requests_per_second must be provided")
+
+    # Use a single key for all instances to create a global throttler
+    key = "global_throttler"
+
+    _throttler_instances[key] = Throttler(request_rate)
+
+
+
+
 def throttle_requests(request_rate=None, requests_per_second=None, **kwargs):
     """
     Decorator to throttle the number of requests per second.
